@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Sliders, Scale, BookOpen, CheckCircle2, Settings } from 'lucide-react';
 import {
   INITIAL_COOKIE_RECIPES,
@@ -56,6 +56,29 @@ export function App() {
     INITIAL_COOKIE_RECIPES[0].id,
     handleStorageSaved
   );
+
+  // Ensure new default pantry items & Roll-Out Lemon Vanilla Bean Sugar Cookie exist in older localStorage caches
+  useEffect(() => {
+    setPantry((prev) => {
+      const existingIds = new Set(prev.map((p) => p.id));
+      const missingDefaults = INITIAL_PANTRY_ITEMS.filter(
+        (item) => !existingIds.has(item.id)
+      );
+      return missingDefaults.length > 0 ? [...missingDefaults, ...prev] : prev;
+    });
+
+    setRecipes((prev) => {
+      const hasLemonVanilla = prev.some(
+        (r) => r.id === 'rec-lemon-vanilla-rollout'
+      );
+      if (!hasLemonVanilla) {
+        const lemonVanillaDefault = INITIAL_COOKIE_RECIPES[0];
+        setActiveRecipeId(lemonVanillaDefault.id);
+        return [lemonVanillaDefault, ...prev];
+      }
+      return prev;
+    });
+  }, []);
 
   const [batchMultiplier, setBatchMultiplier] = usePersistentState<number>(
     STORAGE_KEYS.BATCH_MULTIPLIER,
