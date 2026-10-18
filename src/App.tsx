@@ -64,19 +64,35 @@ export function App() {
       const missingDefaults = INITIAL_PANTRY_ITEMS.filter(
         (item) => !existingIds.has(item.id)
       );
-      return missingDefaults.length > 0 ? [...missingDefaults, ...prev] : prev;
+      const merged =
+        missingDefaults.length > 0 ? [...missingDefaults, ...prev] : prev;
+      return merged.map((item) =>
+        item.brand.includes('Borderlands')
+          ? {
+              ...item,
+              brand: item.brand
+                .replace('Borderlands / ', '')
+                .replace(' / Borderlands', ''),
+            }
+          : item
+      );
     });
 
     setRecipes((prev) => {
       const hasLemonVanilla = prev.some(
         (r) => r.id === 'rec-lemon-vanilla-rollout'
       );
+      const list = !hasLemonVanilla
+        ? [INITIAL_COOKIE_RECIPES[0], ...prev]
+        : prev;
       if (!hasLemonVanilla) {
-        const lemonVanillaDefault = INITIAL_COOKIE_RECIPES[0];
-        setActiveRecipeId(lemonVanillaDefault.id);
-        return [lemonVanillaDefault, ...prev];
+        setActiveRecipeId(INITIAL_COOKIE_RECIPES[0].id);
       }
-      return prev;
+      return list.map((r) =>
+        r.name.includes('(Borderlands)')
+          ? { ...r, name: r.name.replace(' (Borderlands)', '') }
+          : r
+      );
     });
   }, []);
 

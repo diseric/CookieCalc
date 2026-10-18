@@ -134,7 +134,7 @@ export const INITIAL_PANTRY_ITEMS: PantryItem[] = [
   {
     id: 'p-meringue-powder',
     name: 'Artisan Vanilla Meringue Powder',
-    brand: 'Genie’s Dream / Borderlands (2 lb bag)',
+    brand: 'Genie’s Dream / Judee’s (2 lb bag)',
     category: 'Royal Icing & Glaze',
     packageCost: 29.50,
     packageSize: 907,
@@ -184,7 +184,7 @@ export const INITIAL_PANTRY_ITEMS: PantryItem[] = [
   {
     id: 'p-tipless-bags',
     name: '12" Thin-Seam Tipless Piping Bags',
-    brand: 'Borderlands / Truly Mad Plastics (100 pack)',
+    brand: 'Truly Mad Plastics (100 pack)',
     category: 'Piping Bags & Disposables',
     packageCost: 8.99,
     packageSize: 100,
@@ -206,7 +206,7 @@ export const INITIAL_PANTRY_ITEMS: PantryItem[] = [
 export const INITIAL_COOKIE_RECIPES: CookieRecipe[] = [
   {
     id: 'rec-lemon-vanilla-rollout',
-    name: 'Roll-Out Lemon Vanilla Bean Sugar Cookie (Borderlands)',
+    name: 'Roll-Out Lemon Vanilla Bean Sugar Cookie',
     subtitle: 'Chilled 4+ hrs, rolled 1/4" or 3/8" on silicone mat, baked at 375°F for 11–12 mins (3–4" cutouts) or 10–11 mins (2" minis)',
     badge: 'House Signature Dough • Soft Bite',
     rollThickness: '3/8" (10mm)',
@@ -222,7 +222,7 @@ export const INITIAL_COOKIE_RECIPES: CookieRecipe[] = [
     includeLaborInCost: false,
     cottageOverheadPerBatch: 2.00,
     ingredients: [
-      // Exact ingredients from the Borderlands Bakery Roll-Out Lemon Vanilla Bean Sugar Cookie sheet
+      // Roll-Out Lemon Vanilla Bean Sugar Cookie dough ingredients
       {
         id: 'lv-1',
         pantryItemId: 'p-flour-ka',
