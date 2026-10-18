@@ -29,6 +29,7 @@ import {
   validatePantryItemInput,
   validateRecipeIngredientInput,
 } from '../utils/validation';
+import { NumericInput } from './NumericInput';
 
 interface RecipeCostBuilderProps {
   recipe: CookieRecipe;
@@ -755,20 +756,15 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                             {/* Right: Editable Quantity, Unit & Cost */}
                             <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
                               <div className="flex items-center rounded-xl border border-[#332D27] bg-[#181614] p-1">
-                                <input
-                                  type="number"
+                                <NumericInput
                                   min={0.01}
-                                  step="any"
                                   aria-label={`Quantity for ${line.pantryItem.name}`}
                                   value={line.quantity}
-                                  onChange={(e) => {
-                                    const val = parseFloat(e.target.value);
-                                    if (Number.isFinite(val) && val >= 0) {
-                                      onUpdateIngredient(line.lineId, {
-                                        quantity: val,
-                                      });
-                                    }
-                                  }}
+                                  onValueChange={(val) =>
+                                    onUpdateIngredient(line.lineId, {
+                                      quantity: val,
+                                    })
+                                  }
                                   className="w-16 bg-transparent px-2 py-1 text-right font-mono text-xs font-bold text-[#F5F2EB] focus:outline-none"
                                 />
                                 <select
@@ -985,18 +981,13 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                       <div className="font-medium text-[#F5F2EB]">{pack.name}</div>
                       <div className="flex items-center gap-1 text-[#8C8275]">
                         <span>{pack.supplier} • $</span>
-                        <input
-                          type="number"
-                          step="0.50"
-                          min="0.01"
+                        <NumericInput
+                          min={0.01}
                           aria-label={`Bulk cost for ${pack.name}`}
                           value={pack.bulkCost}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            if (Number.isFinite(val) && val > 0) {
-                              onUpdatePackagingLine(pack.id, { bulkCost: val });
-                            }
-                          }}
+                          onValueChange={(val) =>
+                            onUpdatePackagingLine(pack.id, { bulkCost: val })
+                          }
                           className="w-12 border-b border-dotted border-[#3D3730] bg-transparent font-mono text-xs text-[#D5CFC2] focus:border-amber-400 focus:outline-none"
                         />
                         <span>/ {pack.bulkCount} ct</span>
@@ -1065,17 +1056,13 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                 </div>
                 <div className="flex items-center gap-1 rounded-lg border border-[#332D27] bg-[#181614] px-2.5 py-1">
                   <span className="text-xs text-amber-400">$</span>
-                  <input
-                    type="number"
-                    step="0.25"
-                    min="0"
+                  <NumericInput
+                    min={0}
+                    fallbackValue={0}
                     value={recipe.cottageOverheadPerBatch}
-                    onChange={(e) =>
+                    onValueChange={(val) =>
                       onUpdateRecipeMeta({
-                        cottageOverheadPerBatch: Math.max(
-                          0,
-                          parseFloat(e.target.value) || 0
-                        ),
+                        cottageOverheadPerBatch: val,
                       })
                     }
                     className="w-14 bg-transparent text-right font-mono text-xs font-bold text-[#F5F2EB] focus:outline-none"
@@ -1107,17 +1094,14 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                     <label className="block text-xs text-[#8C8275]">
                       Active Mins ({recipe.baseYieldCookies} cookies)
                     </label>
-                    <input
-                      type="number"
+                    <NumericInput
+                      integer
                       min={1}
                       max={1200}
                       value={recipe.prepMinutesPerBatch}
-                      onChange={(e) =>
+                      onValueChange={(val) =>
                         onUpdateRecipeMeta({
-                          prepMinutesPerBatch: Math.max(
-                            1,
-                            parseInt(e.target.value, 10) || 60
-                          ),
+                          prepMinutesPerBatch: val,
                         })
                       }
                       className="mt-1 w-full rounded-lg border border-[#2E2924] bg-[#181614] px-2.5 py-1 font-mono text-xs text-[#F5F2EB]"
@@ -1125,14 +1109,13 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs text-[#8C8275]">Artist Rate ($/hr)</label>
-                    <input
-                      type="number"
+                    <NumericInput
                       min={1}
                       max={250}
                       value={recipe.hourlyLaborRate}
-                      onChange={(e) =>
+                      onValueChange={(val) =>
                         onUpdateRecipeMeta({
-                          hourlyLaborRate: Math.max(1, parseFloat(e.target.value) || 25),
+                          hourlyLaborRate: val,
                         })
                       }
                       className="mt-1 w-full rounded-lg border border-[#2E2924] bg-[#181614] px-2.5 py-1 font-mono text-xs text-[#F5F2EB]"

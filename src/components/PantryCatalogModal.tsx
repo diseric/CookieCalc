@@ -18,6 +18,7 @@ import {
 } from '../types/bakery';
 import { formatCurrency, getCostPerBaseUnit } from '../utils/calculations';
 import { validatePantryItemInput } from '../utils/validation';
+import { NumericInput } from './NumericInput';
 
 interface PantryCatalogModalProps {
   isOpen: boolean;
@@ -383,20 +384,15 @@ export const PantryCatalogModal: React.FC<PantryCatalogModalProps> = ({
                       <label className="block text-xs text-[#8C8275]">Bulk Cost ($)</label>
                       <div className="mt-0.5 flex items-center rounded-lg border border-[#2E2924] bg-[#181614] px-2.5 py-1">
                         <DollarSign className="h-3.5 w-3.5 text-amber-400" />
-                        <input
-                          type="number"
-                          step="0.10"
-                          min="0.01"
+                        <NumericInput
+                          min={0.01}
                           value={item.packageCost}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            if (Number.isFinite(val) && val > 0) {
-                              onUpdatePantryItem({
-                                ...item,
-                                packageCost: val,
-                              });
-                            }
-                          }}
+                          onValueChange={(val) =>
+                            onUpdatePantryItem({
+                              ...item,
+                              packageCost: val,
+                            })
+                          }
                           className="w-20 bg-transparent font-mono text-xs font-semibold text-[#F5F2EB] focus:outline-none"
                         />
                       </div>
@@ -407,20 +403,15 @@ export const PantryCatalogModal: React.FC<PantryCatalogModalProps> = ({
                         Package Size ({item.packageUnit})
                       </label>
                       <div className="mt-0.5 flex items-center rounded-lg border border-[#2E2924] bg-[#181614] px-2.5 py-1">
-                        <input
-                          type="number"
-                          step="any"
-                          min="0.1"
+                        <NumericInput
+                          min={0.1}
                           value={item.packageSize}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            if (Number.isFinite(val) && val > 0) {
-                              onUpdatePantryItem({
-                                ...item,
-                                packageSize: val,
-                              });
-                            }
-                          }}
+                          onValueChange={(val) =>
+                            onUpdatePantryItem({
+                              ...item,
+                              packageSize: val,
+                            })
+                          }
                           className="w-20 bg-transparent font-mono text-xs font-semibold text-[#F5F2EB] focus:outline-none"
                         />
                         <span className="ml-1 text-xs text-[#8C8275]">

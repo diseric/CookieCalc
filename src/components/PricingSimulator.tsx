@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { CookieRecipe, RecipeFinancialSummary } from '../types/bakery';
 import { formatCurrency } from '../utils/calculations';
+import { NumericInput } from './NumericInput';
 
 interface PricingSimulatorProps {
   recipe: CookieRecipe;
@@ -100,19 +101,14 @@ export const PricingSimulator: React.FC<PricingSimulatorProps> = ({
             <div className="flex items-center gap-2">
               <div className="flex items-center rounded-xl border border-[#332D27] bg-[#12100E] px-2.5 py-1">
                 <span className="font-mono text-sm font-bold text-amber-400">$</span>
-                <input
-                  type="number"
-                  step="0.25"
+                <NumericInput
                   min={0.5}
-                  max={50}
+                  max={100}
                   aria-label="Direct retail price per cookie"
                   value={recipe.targetRetailPrice}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    if (Number.isFinite(val) && val > 0 && val <= 100) {
-                      onUpdateRecipeMeta({ targetRetailPrice: val });
-                    }
-                  }}
+                  onValueChange={(val) =>
+                    onUpdateRecipeMeta({ targetRetailPrice: val })
+                  }
                   className="w-16 bg-transparent text-right font-mono text-lg font-bold text-amber-400 focus:outline-none"
                 />
               </div>
@@ -394,17 +390,11 @@ export const PricingSimulator: React.FC<PricingSimulatorProps> = ({
           </span>
           <div className="flex items-center gap-1">
             <span className="font-mono text-sm text-emerald-400">$</span>
-            <input
-              type="number"
-              min={50}
-              step={50}
+            <NumericInput
+              integer
+              min={10}
               value={monthlyProfitGoal}
-              onChange={(e) => {
-                const val = parseInt(e.target.value, 10);
-                if (Number.isFinite(val) && val > 0) {
-                  onChangeMonthlyProfitGoal(val);
-                }
-              }}
+              onValueChange={(val) => onChangeMonthlyProfitGoal(val)}
               className="w-20 bg-transparent text-right font-mono text-base font-bold text-emerald-400 focus:outline-none"
             />
           </div>

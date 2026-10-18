@@ -18,6 +18,7 @@ import {
   RollThickness,
 } from '../types/bakery';
 import { formatCurrency } from '../utils/calculations';
+import { NumericInput } from './NumericInput';
 
 interface ProfitHeroCardsProps {
   recipe: CookieRecipe;
@@ -120,15 +121,15 @@ export const ProfitHeroCards: React.FC<ProfitHeroCardsProps> = ({
               1x Batch Cutout Yield
             </label>
             <div className="mt-0.5 flex items-baseline gap-1.5">
-              <input
+              <NumericInput
                 id="base-yield-input"
-                type="number"
+                integer
                 min={1}
                 max={300}
                 value={recipe.baseYieldCookies}
-                onChange={(e) =>
+                onValueChange={(val) =>
                   onUpdateRecipeMeta({
-                    baseYieldCookies: Math.max(1, parseInt(e.target.value, 10) || 12),
+                    baseYieldCookies: val,
                   })
                 }
                 className="w-12 bg-transparent font-mono text-base font-bold text-amber-400 focus:outline-none"
@@ -193,15 +194,15 @@ export const ProfitHeroCards: React.FC<ProfitHeroCardsProps> = ({
                 ))}
               </select>
               <div className="flex items-center rounded bg-amber-500/15 px-1.5 py-0.5">
-                <input
-                  type="number"
+                <NumericInput
+                  integer
                   min={1}
                   max={30}
                   aria-label="Number of icing colors"
                   value={recipe.colorCount}
-                  onChange={(e) =>
+                  onValueChange={(val) =>
                     onUpdateRecipeMeta({
-                      colorCount: Math.max(1, parseInt(e.target.value, 10) || 1),
+                      colorCount: val,
                     })
                   }
                   className="w-7 bg-transparent text-center font-mono text-xs font-bold text-amber-300 focus:outline-none"
