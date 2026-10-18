@@ -847,15 +847,15 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Per-Cookie Heat-Seal Packaging & Box Presentation */}
         <div className="rounded-2xl border border-[#2E2924] bg-[#181614] p-4 sm:p-5">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-sky-400" />
+              <Package className="h-4 w-4 shrink-0 text-sky-400" />
               <h3 className="text-sm font-bold text-[#F5F2EB]">
                 Heat-Seal Bags, Boxes & Presentation
               </h3>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-semibold text-sky-400">
+              <span className="whitespace-nowrap font-mono text-xs font-semibold text-sky-400">
                 {formatCurrency(financials.packagingCostPerCookie)} / cookie
               </span>
               <button
@@ -864,7 +864,7 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                   setShowAddPack((prev) => !prev);
                   setPackErrors({});
                 }}
-                className="rounded-lg bg-[#24201C] px-2 py-1 text-xs font-semibold text-amber-400 hover:bg-[#2E2924]"
+                className="whitespace-nowrap rounded-lg bg-[#24201C] px-2.5 py-1 text-xs font-semibold text-amber-400 hover:bg-[#2E2924]"
               >
                 + Add Box/Bag
               </button>
@@ -964,23 +964,50 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
               return (
                 <div
                   key={pack.id}
-                  className={`flex items-center justify-between gap-2 rounded-xl border p-2.5 transition ${
+                  className={`space-y-2 rounded-xl border p-3 transition ${
                     pack.enabled
                       ? 'border-[#332D27] bg-[#141210]'
                       : 'border-[#221F1B] bg-[#12100E] opacity-55'
                   }`}
                 >
-                  <label className="flex flex-1 cursor-pointer items-start gap-2.5">
-                    <input
-                      type="checkbox"
-                      checked={pack.enabled}
-                      onChange={() => onTogglePackaging(pack.id)}
-                      className="mt-0.5 h-4 w-4 rounded border-[#3D3730] bg-[#181614] text-amber-500 focus:ring-amber-500"
-                    />
-                    <div className="text-xs">
-                      <div className="font-medium text-[#F5F2EB]">{pack.name}</div>
-                      <div className="flex items-center gap-1 text-[#8C8275]">
-                        <span>{pack.supplier} • $</span>
+                  {/* Top Row: Checkbox + Name/Supplier + Cost Per Cookie + Delete */}
+                  <div className="flex items-start justify-between gap-2">
+                    <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2.5">
+                      <input
+                        type="checkbox"
+                        checked={pack.enabled}
+                        onChange={() => onTogglePackaging(pack.id)}
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#3D3730] bg-[#181614] text-amber-500 focus:ring-amber-500"
+                      />
+                      <div className="min-w-0 text-xs">
+                        <div className="font-medium leading-snug text-[#F5F2EB]">
+                          {pack.name}
+                        </div>
+                        <div className="mt-0.5 text-[#8C8275]">{pack.supplier}</div>
+                      </div>
+                    </label>
+
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <span className="rounded-md bg-[#1D1A16] px-2 py-0.5 font-mono text-xs font-bold text-sky-300">
+                        {formatCurrency(costPerCookie, 2)}/ea
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => onRemovePackagingLine(pack.id)}
+                        title={`Remove ${pack.name}`}
+                        className="rounded p-1 text-[#786F64] transition hover:bg-rose-500/15 hover:text-rose-400"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Editable Bulk Cost & Usage Ratio Dropdown */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#221F1B] pl-6 pt-2 text-xs">
+                    <div className="flex items-center gap-1 text-[#A69C8E]">
+                      <span>Bulk:</span>
+                      <div className="inline-flex items-center rounded-lg border border-[#2E2924] bg-[#181614] px-2 py-0.5">
+                        <span className="mr-0.5 font-mono text-amber-400">$</span>
                         <NumericInput
                           min={0.01}
                           aria-label={`Bulk cost for ${pack.name}`}
@@ -988,14 +1015,14 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                           onValueChange={(val) =>
                             onUpdatePackagingLine(pack.id, { bulkCost: val })
                           }
-                          className="w-12 border-b border-dotted border-[#3D3730] bg-transparent font-mono text-xs text-[#D5CFC2] focus:border-amber-400 focus:outline-none"
+                          className="w-14 bg-transparent font-mono text-xs font-bold text-[#F5F2EB] focus:outline-none"
                         />
-                        <span>/ {pack.bulkCount} ct</span>
                       </div>
+                      <span className="whitespace-nowrap font-mono text-[#8C8275]">
+                        / {pack.bulkCount} ct
+                      </span>
                     </div>
-                  </label>
 
-                  <div className="flex items-center gap-1.5 text-right">
                     <select
                       aria-label={`Usage ratio for ${pack.name}`}
                       value={pack.qtyPerCookie}
@@ -1004,22 +1031,12 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                           qtyPerCookie: parseFloat(e.target.value),
                         })
                       }
-                      className="rounded-lg border border-[#2E2924] bg-[#181614] px-1.5 py-1 font-mono text-xs text-[#D5CFC2]"
+                      className="rounded-lg border border-[#2E2924] bg-[#181614] px-2 py-1 font-mono text-xs text-[#D5CFC2] focus:border-amber-500 focus:outline-none"
                     >
                       <option value={1}>1 / cookie</option>
                       <option value={0.1667}>1 / half-doz</option>
                       <option value={0.0833}>1 / dozen</option>
                     </select>
-                    <span className="min-w-[48px] font-mono text-xs font-semibold text-[#F5F2EB]">
-                      {formatCurrency(costPerCookie, 2)}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => onRemovePackagingLine(pack.id)}
-                      className="p-1 text-[#786F64] hover:text-rose-400"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
                   </div>
                 </div>
               );
