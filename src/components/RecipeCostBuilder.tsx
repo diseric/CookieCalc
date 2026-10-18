@@ -700,7 +700,7 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                           }`}
                         >
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            {/* Left: Ingredient Name, Bulk Price & Editable Notes */}
+                            {/* Left: Ingredient Name & Bulk Price */}
                             <div className="min-w-0 flex-1 space-y-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-sm font-medium text-[#F5F2EB]">
@@ -738,18 +738,6 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                                   <option value="icing">Icing</option>
                                   <option value="decorating">Supplies</option>
                                 </select>
-                                <span>•</span>
-                                <input
-                                  type="text"
-                                  placeholder="Add prep note..."
-                                  value={origLine?.notes ?? ''}
-                                  onChange={(e) =>
-                                    onUpdateIngredient(line.lineId, {
-                                      notes: e.target.value,
-                                    })
-                                  }
-                                  className="w-40 bg-transparent text-xs italic text-[#B8AFA2] placeholder-[#655D53] focus:border-b focus:border-amber-500 focus:outline-none"
-                                />
                               </div>
                             </div>
 
@@ -803,6 +791,25 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                                 <Trash2 className="h-4 w-4" />
                               </button>
                             </div>
+                          </div>
+
+                          {/* Full-Width Prep Note Input so long notes never cut off */}
+                          <div className="mt-2 flex items-center gap-1.5 border-t border-[#221F1B]/80 pt-1.5">
+                            <span className="shrink-0 text-[11px] font-medium text-[#786F64]">
+                              Note:
+                            </span>
+                            <input
+                              type="text"
+                              aria-label={`Prep note for ${line.pantryItem.name}`}
+                              placeholder="Add prep note (e.g., room temperature, sifted together with flour)..."
+                              value={origLine?.notes ?? ''}
+                              onChange={(e) =>
+                                onUpdateIngredient(line.lineId, {
+                                  notes: e.target.value,
+                                })
+                              }
+                              className="w-full min-w-0 flex-1 bg-transparent text-xs italic text-[#C8BFA8] placeholder-[#655D53] focus:border-b focus:border-amber-500 focus:outline-none"
+                            />
                           </div>
                         </div>
                       );
