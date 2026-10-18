@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: #0F0E0C;
+    color: #F5F2EB;
+  }
+}
+
+/* Custom subtle scrollbars for dark mode */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141210;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2E2924;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #443C35;
+}
+
+/* Custom Range Slider Styling */
+input[type='range'].amber-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type='range'].amber-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: #2A2520;
+  border: 1px solid #3A332C;
+}
+
+input[type='range'].amber-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 22px;
+  width: 22px;
+  border-radius: 9999px;
+  background: #F59E0B;
+  border: 2px solid #FEF3C7;
+  margin-top: -8px;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.45);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+input[type='range'].amber-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  background: #FBBF24;
+}
