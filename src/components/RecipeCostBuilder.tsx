@@ -404,69 +404,103 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-6">
-                <div className="sm:col-span-2">
-                  <label className="block text-xs text-[#9E9589]">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
+                {/* Row 1: Ingredient Name (7 cols) + Recipe Section (5 cols) */}
+                <div className="sm:col-span-7">
+                  <label className="block text-xs font-medium text-[#D5CFC2]">
                     Ingredient Name *
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g., Cream Cheese / Cocoa Powder"
+                    placeholder="e.g., Cream Cheese, Sour Cream, Cocoa Powder"
                     value={customName}
                     onChange={(e) => {
                       setCustomName(e.target.value);
                       if (customErrors.name)
                         setCustomErrors((prev) => ({ ...prev, name: '' }));
                     }}
-                    className={`mt-1 w-full rounded-lg border bg-[#12100E] px-2.5 py-1.5 text-xs text-[#F5F2EB] ${
-                      customErrors.name ? 'border-rose-500' : 'border-[#332D27]'
+                    className={`mt-1 w-full rounded-xl border bg-[#12100E] px-3 py-2 text-sm text-[#F5F2EB] placeholder-[#6E655B] focus:outline-none ${
+                      customErrors.name
+                        ? 'border-rose-500'
+                        : 'border-[#332D27] focus:border-amber-500'
                     }`}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs text-[#9E9589]">
+                <div className="sm:col-span-5">
+                  <label className="block text-xs font-medium text-[#D5CFC2]">
+                    Recipe Section
+                  </label>
+                  <select
+                    value={customSection}
+                    onChange={(e) => setCustomSection(e.target.value as RecipeSectionType)}
+                    className="mt-1 w-full rounded-xl border border-[#332D27] bg-[#12100E] px-3 py-2 text-sm text-[#F5F2EB] focus:border-amber-500 focus:outline-none"
+                  >
+                    <option value="dough">1. Cutout Dough</option>
+                    <option value="icing">2. Royal Icing</option>
+                    <option value="decorating">3. Colors & Bags</option>
+                  </select>
+                </div>
+
+                {/* Row 2: Package Cost (4 cols) + Package Size & Unit (4 cols) + Amount in Recipe & Unit (4 cols) */}
+                <div className="sm:col-span-4">
+                  <label className="block text-xs font-medium text-[#D5CFC2]">
                     Package Cost ($) *
                   </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={customBulkCost}
-                    onChange={(e) => {
-                      setCustomBulkCost(e.target.value);
-                      if (customErrors.packageCost)
-                        setCustomErrors((prev) => ({ ...prev, packageCost: '' }));
-                    }}
-                    className={`mt-1 w-full rounded-lg border bg-[#12100E] px-2.5 py-1.5 font-mono text-xs text-[#F5F2EB] ${
-                      customErrors.packageCost ? 'border-rose-500' : 'border-[#332D27]'
+                  <div
+                    className={`mt-1 flex items-center rounded-xl border bg-[#12100E] px-3 py-2 ${
+                      customErrors.packageCost
+                        ? 'border-rose-500'
+                        : 'border-[#332D27] focus-within:border-amber-500'
                     }`}
-                  />
+                  >
+                    <span className="mr-1.5 font-mono text-sm font-bold text-amber-400">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      placeholder="12.99"
+                      value={customBulkCost}
+                      onChange={(e) => {
+                        setCustomBulkCost(e.target.value);
+                        if (customErrors.packageCost)
+                          setCustomErrors((prev) => ({ ...prev, packageCost: '' }));
+                      }}
+                      className="w-full min-w-[70px] bg-transparent font-mono text-sm font-bold text-[#F5F2EB] focus:outline-none"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs text-[#9E9589]">
+                <div className="sm:col-span-4">
+                  <label className="block text-xs font-medium text-[#D5CFC2]">
                     Package Size *
                   </label>
-                  <div className="mt-1 flex gap-1">
+                  <div
+                    className={`mt-1 flex items-center rounded-xl border bg-[#12100E] p-1 ${
+                      customErrors.packageSize
+                        ? 'border-rose-500'
+                        : 'border-[#332D27] focus-within:border-amber-500'
+                    }`}
+                  >
                     <input
                       type="number"
                       step="any"
                       min="0.1"
+                      placeholder="454"
                       value={customBulkSize}
                       onChange={(e) => {
                         setCustomBulkSize(e.target.value);
                         if (customErrors.packageSize)
                           setCustomErrors((prev) => ({ ...prev, packageSize: '' }));
                       }}
-                      className={`w-full rounded-lg border bg-[#12100E] px-2 py-1.5 font-mono text-xs text-[#F5F2EB] ${
-                        customErrors.packageSize ? 'border-rose-500' : 'border-[#332D27]'
-                      }`}
+                      className="w-full min-w-[70px] flex-1 bg-transparent px-2.5 py-1 font-mono text-sm font-bold text-[#F5F2EB] focus:outline-none"
                     />
                     <select
                       value={customBulkUnit}
                       onChange={(e) => setCustomBulkUnit(e.target.value as UnitType)}
-                      className="rounded-lg border border-[#332D27] bg-[#12100E] px-1.5 py-1.5 font-mono text-xs text-amber-400"
+                      className="rounded-lg bg-[#221F1B] px-2.5 py-1 font-mono text-xs font-semibold text-amber-400 focus:outline-none"
                     >
                       <option value="g">g</option>
                       <option value="oz">oz</option>
@@ -477,29 +511,34 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs text-[#9E9589]">
+                <div className="sm:col-span-4">
+                  <label className="block text-xs font-medium text-[#D5CFC2]">
                     Amount in Recipe *
                   </label>
-                  <div className="mt-1 flex gap-1">
+                  <div
+                    className={`mt-1 flex items-center rounded-xl border bg-[#12100E] p-1 ${
+                      customErrors.quantity
+                        ? 'border-rose-500'
+                        : 'border-[#332D27] focus-within:border-amber-500'
+                    }`}
+                  >
                     <input
                       type="number"
                       step="any"
                       min="0.01"
+                      placeholder="50"
                       value={customRecipeQty}
                       onChange={(e) => {
                         setCustomRecipeQty(e.target.value);
                         if (customErrors.quantity)
                           setCustomErrors((prev) => ({ ...prev, quantity: '' }));
                       }}
-                      className={`w-full rounded-lg border bg-[#12100E] px-2 py-1.5 font-mono text-xs font-bold text-amber-300 ${
-                        customErrors.quantity ? 'border-rose-500' : 'border-[#332D27]'
-                      }`}
+                      className="w-full min-w-[70px] flex-1 bg-transparent px-2.5 py-1 font-mono text-sm font-bold text-amber-300 focus:outline-none"
                     />
                     <select
                       value={customRecipeUnit}
                       onChange={(e) => setCustomRecipeUnit(e.target.value as UnitType)}
-                      className="rounded-lg border border-[#332D27] bg-[#12100E] px-1.5 py-1.5 font-mono text-xs text-amber-400"
+                      className="rounded-lg bg-[#221F1B] px-2.5 py-1 font-mono text-xs font-semibold text-amber-400 focus:outline-none"
                     >
                       {UNITS.map((u) => (
                         <option key={u} value={u}>
@@ -509,27 +548,12 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                     </select>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-xs text-[#9E9589]">
-                    Recipe Section
-                  </label>
-                  <select
-                    value={customSection}
-                    onChange={(e) => setCustomSection(e.target.value as RecipeSectionType)}
-                    className="mt-1 w-full rounded-lg border border-[#332D27] bg-[#12100E] px-2 py-1.5 text-xs text-[#F5F2EB]"
-                  >
-                    <option value="dough">1. Cutout Dough</option>
-                    <option value="icing">2. Royal Icing</option>
-                    <option value="decorating">3. Colors & Bags</option>
-                  </select>
-                </div>
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-1">
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-1.5 text-xs font-bold text-[#0F0E0C] transition hover:bg-amber-400"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-[#0F0E0C] shadow-sm transition hover:bg-amber-400"
                 >
                   <PlusCircle className="h-3.5 w-3.5" />
                   <span>Save & Add to Recipe</span>

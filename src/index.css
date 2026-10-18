@@ -8,6 +8,18 @@
     background-color: #0F0E0C;
     color: #F5F2EB;
   }
+
+  /* Prevent native number input spinners from crowding out digits in compact inputs */
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
 
 /* Custom subtle scrollbars for dark mode */

@@ -237,35 +237,35 @@ export const PantryCatalogModal: React.FC<PantryCatalogModalProps> = ({
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-6">
-              <div className="sm:col-span-2">
-                <label className="block text-xs text-[#9E9589]">Item Name *</label>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
+              <div className="sm:col-span-5">
+                <label className="block text-xs font-medium text-[#D5CFC2]">Item Name *</label>
                 <input
                   type="text"
                   placeholder="e.g., Edible Gold Leaf / Lemon Emulsion"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className={`mt-1 w-full rounded-lg border bg-[#141210] px-2.5 py-1.5 text-xs text-[#F5F2EB] ${
+                  className={`mt-1 w-full rounded-xl border bg-[#141210] px-3 py-2 text-xs text-[#F5F2EB] ${
                     formErrors.name ? 'border-rose-500' : 'border-[#332D27]'
                   }`}
                 />
               </div>
-              <div>
-                <label className="block text-xs text-[#9E9589]">Brand / Supplier</label>
+              <div className="sm:col-span-3">
+                <label className="block text-xs font-medium text-[#D5CFC2]">Brand / Supplier</label>
                 <input
                   type="text"
                   placeholder="e.g., The Sugar Art"
                   value={newBrand}
                   onChange={(e) => setNewBrand(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-[#332D27] bg-[#141210] px-2.5 py-1.5 text-xs text-[#F5F2EB]"
+                  className="mt-1 w-full rounded-xl border border-[#332D27] bg-[#141210] px-3 py-2 text-xs text-[#F5F2EB]"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-[#9E9589]">Category</label>
+              <div className="sm:col-span-4">
+                <label className="block text-xs font-medium text-[#D5CFC2]">Category</label>
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value as IngredientCategory)}
-                  className="mt-1 w-full rounded-lg border border-[#332D27] bg-[#141210] px-2 py-1.5 text-xs text-[#F5F2EB]"
+                  className="mt-1 w-full rounded-xl border border-[#332D27] bg-[#141210] px-3 py-2 text-xs text-[#F5F2EB]"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
@@ -274,36 +274,43 @@ export const PantryCatalogModal: React.FC<PantryCatalogModalProps> = ({
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-xs text-[#9E9589]">Bulk Cost ($) *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={newCost}
-                  onChange={(e) => setNewCost(e.target.value)}
-                  className={`mt-1 w-full rounded-lg border bg-[#141210] px-2.5 py-1.5 font-mono text-xs text-[#F5F2EB] ${
+              <div className="sm:col-span-6">
+                <label className="block text-xs font-medium text-[#D5CFC2]">Bulk Cost ($) *</label>
+                <div
+                  className={`mt-1 flex items-center rounded-xl border bg-[#141210] px-3 py-1.5 ${
                     formErrors.packageCost ? 'border-rose-500' : 'border-[#332D27]'
                   }`}
-                />
+                >
+                  <span className="mr-1.5 font-mono text-sm font-bold text-amber-400">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={newCost}
+                    onChange={(e) => setNewCost(e.target.value)}
+                    className="w-full min-w-[80px] bg-transparent font-mono text-sm font-bold text-[#F5F2EB] focus:outline-none"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs text-[#9E9589]">Size / Count *</label>
-                <div className="mt-1 flex gap-1">
+              <div className="sm:col-span-6">
+                <label className="block text-xs font-medium text-[#D5CFC2]">Size / Count *</label>
+                <div
+                  className={`mt-1 flex items-center rounded-xl border bg-[#141210] p-1 ${
+                    formErrors.packageSize ? 'border-rose-500' : 'border-[#332D27]'
+                  }`}
+                >
                   <input
                     type="number"
                     step="any"
                     min="0.1"
                     value={newSize}
                     onChange={(e) => setNewSize(e.target.value)}
-                    className={`w-full rounded-lg border bg-[#141210] px-2 py-1.5 font-mono text-xs text-[#F5F2EB] ${
-                      formErrors.packageSize ? 'border-rose-500' : 'border-[#332D27]'
-                    }`}
+                    className="w-full min-w-[80px] flex-1 bg-transparent px-2.5 py-1 font-mono text-sm font-bold text-[#F5F2EB] focus:outline-none"
                   />
                   <select
                     value={newUnit}
                     onChange={(e) => setNewUnit(e.target.value as UnitType)}
-                    className="rounded-lg border border-[#332D27] bg-[#141210] px-1.5 py-1.5 text-xs text-[#F5F2EB]"
+                    className="rounded-lg bg-[#221F1B] px-2.5 py-1 font-mono text-xs font-semibold text-amber-400 focus:outline-none"
                   >
                     <option value="g">g</option>
                     <option value="kg">kg</option>
