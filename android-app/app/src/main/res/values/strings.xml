@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CookieCalc</string>
+    <string name="title_activity_main">CookieCalc</string>
+    <string name="package_name">com.cookiecalc.studio</string>
+    <string name="custom_url_scheme">com.cookiecalc.studio</string>
+</resources>

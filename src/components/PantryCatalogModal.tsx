@@ -133,14 +133,18 @@ export const PantryCatalogModal: React.FC<PantryCatalogModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="pantry-modal-title"
     >
-      <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-[#332D27] bg-[#181614] shadow-2xl">
+      <div className="flex max-h-[92dvh] w-full max-w-4xl flex-col overflow-hidden rounded-t-3xl border border-[#332D27] bg-[#181614] pb-safe shadow-2xl sm:max-h-[90vh] sm:rounded-2xl">
+        {/* Mobile Bottom Sheet Pill Indicator */}
+        <div className="flex justify-center pt-2.5 sm:hidden">
+          <div className="h-1.5 w-12 rounded-full bg-[#36302A]" />
+        </div>
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-[#2A2520] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-[#2A2520] px-4 py-3.5 sm:px-5 sm:py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400">
               <Scale className="h-5 w-5" />

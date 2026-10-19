@@ -1,5 +1,12 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Sliders, Scale, BookOpen, CheckCircle2, Settings } from 'lucide-react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import {
+  Sliders,
+  Scale,
+  BookOpen,
+  CheckCircle2,
+  Settings,
+  PlusCircle,
+} from 'lucide-react';
 import {
   INITIAL_COOKIE_RECIPES,
   INITIAL_PANTRY_ITEMS,
@@ -114,11 +121,47 @@ export function App() {
   const [mobileTab, setMobileTab] = useState<'recipe' | 'pricing'>('recipe');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Kitchen Mode (Screen Wake Lock API so phone doesn't sleep while weighing dough or piping icing)
+  const [kitchenWakeLockActive, setKitchenWakeLockActive] = useState<boolean>(false);
+  const wakeLockSentinelRef = useRef<{ release: () => Promise<void> } | null>(null);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage((prev) => (prev === msg ? null : prev));
     }, 2800);
+  };
+
+  const handleToggleKitchenWakeLock = async () => {
+    if (kitchenWakeLockActive) {
+      try {
+        await wakeLockSentinelRef.current?.release();
+      } catch {
+        // Ignore release errors
+      }
+      wakeLockSentinelRef.current = null;
+      setKitchenWakeLockActive(false);
+      showToast('Kitchen Mode off — normal screen timeout restored');
+      return;
+    }
+
+    try {
+      const nav = navigator as Navigator & {
+        wakeLock?: { request: (type: 'screen') => Promise<{ release: () => Promise<void> }> };
+      };
+      if (nav.wakeLock) {
+        const sentinel = await nav.wakeLock.request('screen');
+        wakeLockSentinelRef.current = sentinel;
+        setKitchenWakeLockActive(true);
+        showToast('Kitchen Mode active — screen will stay awake while baking');
+      } else {
+        setKitchenWakeLockActive(true);
+        showToast('Kitchen Mode toggled on');
+      }
+    } catch {
+      setKitchenWakeLockActive((prev) => !prev);
+      showToast('Kitchen Mode toggled');
+    }
   };
 
   const activeRecipe = useMemo(
@@ -311,7 +354,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F0E0C] pb-16 text-[#F5F2EB]">
+    <div className="min-h-screen bg-[#0F0E0C] pb-24 text-[#F5F2EB] lg:pb-16">
       {/* Top Sticky Navigation & Recipe Builder Bar */}
       <HeaderBar
         recipes={recipes}
@@ -326,68 +369,26 @@ export function App() {
         pantryCount={pantry.length}
         onOpenPantry={() => setIsPantryOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        kitchenWakeLockActive={kitchenWakeLockActive}
+        onToggleKitchenWakeLock={handleToggleKitchenWakeLock}
       />
 
-      {/* Action Confirmation Toast */}
+      {/* Action Confirmation Toast (Positioned above bottom nav on mobile) */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-[#14201A] px-4 py-2.5 text-xs font-semibold text-emerald-300 shadow-xl">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+        <div className="fixed bottom-20 left-4 right-4 z-50 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/40 bg-[#14201A]/95 px-4 py-2.5 text-xs font-semibold text-emerald-300 shadow-xl backdrop-blur-md sm:left-auto sm:right-5 lg:bottom-5">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Main Content Container */}
-      <main className="mx-auto max-w-7xl space-y-6 px-4 pt-5 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl space-y-5 px-3 pt-4 sm:space-y-6 sm:px-6 sm:pt-5 lg:px-8">
         {/* Top Hero KPI Cards & Inline Editable Recipe Header */}
         <ProfitHeroCards
           recipe={activeRecipe}
           financials={financials}
           onUpdateRecipeMeta={handleUpdateRecipeMeta}
         />
-
-        {/* Mobile View Switcher Tabs (Visible on < lg screens) */}
-        <div className="grid grid-cols-4 gap-1.5 rounded-2xl border border-[#2A2520] bg-[#141210] p-1.5 lg:hidden">
-          <button
-            type="button"
-            onClick={() => setMobileTab('recipe')}
-            className={`flex items-center justify-center gap-1 rounded-xl py-2.5 text-xs font-semibold transition ${
-              mobileTab === 'recipe'
-                ? 'bg-amber-500 text-[#0F0E0C] shadow-sm'
-                : 'text-[#A69C8E] hover:text-[#F5F2EB]'
-            }`}
-          >
-            <Scale className="h-3.5 w-3.5" />
-            <span>Recipe</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setMobileTab('pricing')}
-            className={`flex items-center justify-center gap-1 rounded-xl py-2.5 text-xs font-semibold transition ${
-              mobileTab === 'pricing'
-                ? 'bg-amber-500 text-[#0F0E0C] shadow-sm'
-                : 'text-[#A69C8E] hover:text-[#F5F2EB]'
-            }`}
-          >
-            <Sliders className="h-3.5 w-3.5" />
-            <span>Pricing</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsPantryOpen(true)}
-            className="flex items-center justify-center gap-1 rounded-xl py-2.5 text-xs font-semibold text-[#A69C8E] hover:text-[#F5F2EB]"
-          >
-            <BookOpen className="h-3.5 w-3.5 text-amber-400" />
-            <span>Supplies</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center justify-center gap-1 rounded-xl py-2.5 text-xs font-semibold text-[#A69C8E] hover:text-[#F5F2EB]"
-          >
-            <Settings className="h-3.5 w-3.5 text-amber-400" />
-            <span>Settings</span>
-          </button>
-        </div>
 
         {/* 12-Column Responsive Split Workspace */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
@@ -430,6 +431,76 @@ export function App() {
           </div>
         </div>
       </main>
+
+      {/* Fixed Mobile Bottom Thumb-Zone Navigation Bar (< lg screens) */}
+      <nav
+        aria-label="Mobile Bottom Navigation"
+        className="fixed bottom-0 inset-x-0 z-40 border-t border-[#2A2520] bg-[#12100E]/95 px-2 pt-1.5 pb-safe backdrop-blur-md lg:hidden"
+      >
+        <div className="mx-auto grid max-w-md grid-cols-5 items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setMobileTab('recipe')}
+            className={`flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${
+              mobileTab === 'recipe' && !isPantryOpen && !isSettingsOpen && !isNewRecipeOpen
+                ? 'bg-amber-500/15 text-amber-400'
+                : 'text-[#9E9589] active:text-[#F5F2EB]'
+            }`}
+          >
+            <Scale className="h-4 w-4" />
+            <span>Recipe</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMobileTab('pricing')}
+            className={`flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${
+              mobileTab === 'pricing' && !isPantryOpen && !isSettingsOpen && !isNewRecipeOpen
+                ? 'bg-amber-500/15 text-amber-400'
+                : 'text-[#9E9589] active:text-[#F5F2EB]'
+            }`}
+          >
+            <Sliders className="h-4 w-4" />
+            <span>Pricing</span>
+          </button>
+
+          {/* Center Primary Action: + Build New Recipe */}
+          <button
+            type="button"
+            onClick={() => setIsNewRecipeOpen(true)}
+            className="flex min-h-[48px] flex-col items-center justify-center gap-0.5 rounded-2xl bg-amber-500 py-1.5 text-[11px] font-bold text-[#0F0E0C] shadow-md shadow-amber-500/20 active:scale-95"
+          >
+            <PlusCircle className="h-4 w-4 stroke-[2.5]" />
+            <span>New Set</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsPantryOpen(true)}
+            className={`flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${
+              isPantryOpen
+                ? 'bg-amber-500/15 text-amber-400'
+                : 'text-[#9E9589] active:text-[#F5F2EB]'
+            }`}
+          >
+            <BookOpen className="h-4 w-4" />
+            <span>Supplies</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className={`flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${
+              isSettingsOpen
+                ? 'bg-amber-500/15 text-amber-400'
+                : 'text-[#9E9589] active:text-[#F5F2EB]'
+            }`}
+          >
+            <Settings className="h-4 w-4" />
+            <span>Settings</span>
+          </button>
+        </div>
+      </nav>
 
       {/* Build New Recipe Modal */}
       <NewRecipeModal

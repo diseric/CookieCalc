@@ -99,16 +99,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-modal-title"
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-[#332D27] bg-[#181614] shadow-2xl">
+      <div className="flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-[#332D27] bg-[#181614] pb-safe shadow-2xl sm:max-h-[90vh] sm:rounded-2xl">
+        {/* Mobile Bottom Sheet Pill Indicator */}
+        <div className="flex justify-center pt-2.5 sm:hidden">
+          <div className="h-1.5 w-12 rounded-full bg-[#36302A]" />
+        </div>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#2A2520] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-[#2A2520] px-4 py-3.5 sm:px-5 sm:py-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400">
               <Settings className="h-5 w-5" />
             </div>
             <div>
@@ -132,7 +136,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        <div className="space-y-5 p-5">
+        <div className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-5">
           {/* LocalStorage Status Card */}
           <div className="rounded-xl border border-emerald-500/30 bg-[#131F19] p-4">
             <div className="flex items-center justify-between">

@@ -1,0 +1,11 @@
+{
+  "appId": "com.cookiecalc.studio",
+  "appName": "CookieCalc",
+  "webDir": "dist",
+  "backgroundColor": "#0F0E0C",
+  "android": {
+    "path": "android-app",
+    "backgroundColor": "#0F0E0C",
+    "allowMixedContent": true
+  }
+}
