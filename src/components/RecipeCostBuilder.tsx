@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   Plus,
+  Minus,
   Trash2,
   Package,
   Scale,
@@ -12,6 +13,10 @@ import {
   BookOpen,
   Search,
   ArrowUpDown,
+  Check,
+  ClipboardCheck,
+  Copy,
+  RotateCcw,
 } from 'lucide-react';
 import {
   CookieRecipe,
@@ -97,9 +102,20 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
   const [addMode, setAddMode] = useState<'pantry' | 'custom'>('pantry');
 
   // Filter & Sort inside recipe
+  // Filter & Sort inside recipe
   const [recipeSearch, setRecipeSearch] = useState<string>('');
   const [sectionFilter, setSectionFilter] = useState<'all' | RecipeSectionType>('all');
   const [sortMode, setSortMode] = useState<IngredientSortMode>('default');
+
+  // Interactive Bake & Weigh Checklist state
+  const [checkedLineIds, setCheckedLineIds] = useState<string[]>([]);
+  const [copiedRecipeSheet, setCopiedRecipeSheet] = useState<boolean>(false);
+
+  const toggleCheckedLine = (lineId: string) => {
+    setCheckedLineIds((prev) =>
+      prev.includes(lineId) ? prev.filter((id) => id !== lineId) : [...prev, lineId]
+    );
+  };
 
   // State for 'pantry' mode
   const [selectedNewPantryId, setSelectedNewPantryId] = useState<string>(
@@ -110,6 +126,70 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
   const [newSection, setNewSection] = useState<RecipeSectionType>('dough');
   const [newNotes, setNewNotes] = useState<string>('');
   const [pantryAddErrors, setPantryAddErrors] = useState<Record<string, string>>({});
+
+  // Smart auto-sync of default Unit, Quantity, and Section when selecting an item from the Supply Book
+  const handleSelectSupplyFromBook = (pantryId: string) => {
+    setSelectedNewPantryId(pantryId);
+    const item = pantry.find((p) => p.id === pantryId);
+    if (!item) return;
+
+    if (item.packageUnit === 'each') {
+      setNewUnit('each');
+      setNewQty(item.category === 'Piping Bags & Disposables' ? '12' : '2');
+    } else {
+      setNewUnit('g');
+      if (
+        item.category === 'Flavorings & Emulsions' ||
+        item.category === 'Gel Colors, Dusts & Transfers'
+      ) {
+        setNewQty('15');
+      } else {
+        setNewQty('100');
+      }
+    }
+
+    if (
+      item.category === 'Cutout Dough Base' ||
+      item.category === 'Flavorings & Emulsions'
+    ) {
+      setNewSection('dough');
+    } else if (item.category === 'Royal Icing & Glaze') {
+      setNewSection('icing');
+    } else {
+      setNewSection('decorating');
+    }
+  };
+
+  const handleCopyRecipeSheet = () => {
+    const mult = financials.batchMultiplier;
+    const header = [
+      `🍪 ${recipe.name} (${mult}x Batch = ${financials.effectiveYield} Cutouts / ${financials.effectiveDozens} Dozen)`,
+      `Roll Thickness: ${recipe.rollThickness} • Cutters: ${recipe.cutterSizeProfile}`,
+      `Total Batch Cost: ${formatCurrency(financials.totalBatchCost)} (${formatCurrency(financials.exactCostPerCookie)}/cookie)`,
+      '',
+    ];
+
+    const sections: RecipeSectionType[] = ['dough', 'icing', 'decorating'];
+    const body: string[] = [];
+
+    for (const sec of sections) {
+      const lines = financials.ingredientLines.filter((l) => l.section === sec);
+      if (lines.length === 0) continue;
+      body.push(`--- ${SECTION_LABELS[sec].title} ---`);
+      for (const l of lines) {
+        const orig = recipe.ingredients.find((i) => i.id === l.lineId);
+        const noteStr = orig?.notes ? ` — ${orig.notes}` : '';
+        body.push(
+          `[ ] ${l.scaledQuantity} ${l.unit} ${l.pantryItem.name} (${formatCurrency(l.scaledCost)})${noteStr}`
+        );
+      }
+      body.push('');
+    }
+
+    navigator.clipboard?.writeText([...header, ...body].join('\n')).catch(() => {});
+    setCopiedRecipeSheet(true);
+    setTimeout(() => setCopiedRecipeSheet(false), 2500);
+  };
 
   // State for 'custom' on-the-fly ingredient creation mode
   const [customName, setCustomName] = useState<string>('');
@@ -257,24 +337,56 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
       {/* Main Recipe Builder Card */}
       <div className="overflow-hidden rounded-2xl border border-[#2E2924] bg-[#181614] shadow-sm">
         {/* Card Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2A2520] bg-[#141210] px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2A2520] bg-[#141210] px-4 py-3.5 sm:px-5 sm:py-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Scale className="h-4 w-4 text-amber-400" />
-              <h2 className="text-base font-bold text-[#F5F2EB]">
-                Interactive Recipe & Set Builder
+              <h2 className="text-sm font-bold text-[#F5F2EB] sm:text-base">
+                Interactive Recipe & Weigh Checklist
               </h2>
+              {checkedLineIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setCheckedLineIds([])}
+                  className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-300 transition hover:bg-emerald-500/25"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  <span>
+                    {checkedLineIds.length}/{recipe.ingredients.length} weighed • Reset
+                  </span>
+                </button>
+              )}
             </div>
             <p className="mt-0.5 text-xs text-[#9E9589]">
-              Add, remove, filter, or adjust any ingredient in grams, ounces, cups, tbsp, tsp, or each.
+              Tap the circle next to any item to check it off while weighing at your scale.
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-xs text-[#9E9589]">
-              Total Dough + Icing + Supplies ({financials.batchMultiplier}x)
-            </div>
-            <div className="font-mono text-lg font-bold text-amber-400">
-              {formatCurrency(financials.totalIngredientsCost)}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleCopyRecipeSheet}
+              title="Copy scaled recipe & weigh sheet to clipboard"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#332D27] bg-[#181614] px-3 py-1.5 text-xs font-semibold text-amber-400 transition hover:border-amber-500/40 hover:bg-[#221F1B]"
+            >
+              {copiedRecipeSheet ? (
+                <>
+                  <ClipboardCheck className="h-3.5 w-3.5 text-emerald-400" />
+                  <span className="text-emerald-400">Copied Sheet!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>Copy Recipe Sheet</span>
+                </>
+              )}
+            </button>
+            <div className="text-right">
+              <div className="text-[11px] text-[#9E9589] sm:text-xs">
+                Total ({financials.batchMultiplier}x Batch)
+              </div>
+              <div className="font-mono text-base font-bold text-amber-400 sm:text-lg">
+                {formatCurrency(financials.totalIngredientsCost)}
+              </div>
             </div>
           </div>
         </div>
@@ -331,7 +443,7 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
               <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
                 <select
                   value={selectedNewPantryId}
-                  onChange={(e) => setSelectedNewPantryId(e.target.value)}
+                  onChange={(e) => handleSelectSupplyFromBook(e.target.value)}
                   className="flex-1 rounded-xl border border-[#332D27] bg-[#181614] px-3 py-2 text-xs font-medium text-[#F5F2EB] focus:border-amber-500 focus:outline-none"
                 >
                   {pantry.map((item) => (
@@ -689,61 +801,118 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                       const isHighCostDriver = line.percentOfIngredientTotal >= 18;
                       const perCookieLineCost = line.scaledCost / financials.effectiveYield;
                       const origLine = recipe.ingredients.find((i) => i.id === line.lineId);
+                      const isChecked = checkedLineIds.includes(line.lineId);
+                      const stepAmount =
+                        line.unit === 'g' || line.unit === 'ml'
+                          ? line.quantity >= 100
+                            ? 25
+                            : line.quantity >= 15
+                            ? 5
+                            : 1
+                          : 1;
 
                       return (
                         <div
                           key={line.lineId}
                           className={`group rounded-xl border p-3 transition ${
-                            isHighCostDriver
+                            isChecked
+                              ? 'border-emerald-500/35 bg-[#121C17]/80 opacity-80'
+                              : isHighCostDriver
                               ? 'border-amber-500/30 bg-[#1E1A16]'
                               : 'border-[#26221E] bg-[#141210] hover:border-[#36302A]'
                           }`}
                         >
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            {/* Left: Ingredient Name & Bulk Price */}
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-sm font-medium text-[#F5F2EB]">
-                                  {line.pantryItem.name}
-                                </span>
-                                {isHighCostDriver && (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-300">
-                                    <Sparkles className="h-3 w-3" />
-                                    {line.percentOfIngredientTotal.toFixed(0)}% of batch
+                            {/* Left: Weigh Check Circle + Ingredient Name + Scaled Badge & Bulk Price */}
+                            <div className="flex min-w-0 flex-1 items-start gap-2.5">
+                              <button
+                                type="button"
+                                onClick={() => toggleCheckedLine(line.lineId)}
+                                title={
+                                  isChecked
+                                    ? 'Mark as not weighed'
+                                    : 'Check off as weighed on scale'
+                                }
+                                className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition ${
+                                  isChecked
+                                    ? 'border-emerald-400 bg-emerald-500 text-[#0F0E0C]'
+                                    : 'border-[#443C35] bg-[#181614] text-transparent hover:border-amber-400'
+                                }`}
+                              >
+                                <Check className="h-3 w-3 stroke-[3]" />
+                              </button>
+
+                              <div className="min-w-0 flex-1 space-y-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span
+                                    className={`text-sm font-medium ${
+                                      isChecked
+                                        ? 'line-through text-[#9E9589]'
+                                        : 'text-[#F5F2EB]'
+                                    }`}
+                                  >
+                                    {line.pantryItem.name}
                                   </span>
-                                )}
-                              </div>
-                              <div className="flex flex-wrap items-center gap-2 text-xs text-[#8C8275]">
-                                <button
-                                  type="button"
-                                  onClick={onOpenPantry}
-                                  className="font-mono text-[#A69C8E] underline decoration-dotted underline-offset-2 hover:text-amber-400"
-                                >
-                                  Bulk: {formatCurrency(line.pantryItem.packageCost)} /{' '}
-                                  {line.pantryItem.packageSize}
-                                  {line.pantryItem.packageUnit}
-                                </button>
-                                <span>•</span>
-                                <select
-                                  aria-label={`Move ${line.pantryItem.name} to section`}
-                                  value={line.section}
-                                  onChange={(e) =>
-                                    onUpdateIngredient(line.lineId, {
-                                      section: e.target.value as RecipeSectionType,
-                                    })
-                                  }
-                                  className="rounded bg-[#1C1916] px-1.5 py-0.5 text-xs text-[#A69C8E] hover:text-[#F5F2EB] focus:outline-none"
-                                >
-                                  <option value="dough">Dough</option>
-                                  <option value="icing">Icing</option>
-                                  <option value="decorating">Supplies</option>
-                                </select>
+                                  {financials.batchMultiplier > 1 && (
+                                    <span className="inline-flex items-center rounded-md bg-amber-500/20 px-2 py-0.5 font-mono text-xs font-bold text-amber-300">
+                                      {financials.batchMultiplier}x Weigh: {line.scaledQuantity}{' '}
+                                      {line.unit}
+                                    </span>
+                                  )}
+                                  {isHighCostDriver && !isChecked && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-300">
+                                      <Sparkles className="h-3 w-3" />
+                                      {line.percentOfIngredientTotal.toFixed(0)}% of batch
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2 text-xs text-[#8C8275]">
+                                  <button
+                                    type="button"
+                                    onClick={onOpenPantry}
+                                    className="font-mono text-[#A69C8E] underline decoration-dotted underline-offset-2 hover:text-amber-400"
+                                  >
+                                    Bulk: {formatCurrency(line.pantryItem.packageCost)} /{' '}
+                                    {line.pantryItem.packageSize}
+                                    {line.pantryItem.packageUnit}
+                                  </button>
+                                  <span>•</span>
+                                  <select
+                                    aria-label={`Move ${line.pantryItem.name} to section`}
+                                    value={line.section}
+                                    onChange={(e) =>
+                                      onUpdateIngredient(line.lineId, {
+                                        section: e.target.value as RecipeSectionType,
+                                      })
+                                    }
+                                    className="rounded bg-[#1C1916] px-1.5 py-0.5 text-xs text-[#A69C8E] hover:text-[#F5F2EB] focus:outline-none"
+                                  >
+                                    <option value="dough">Dough</option>
+                                    <option value="icing">Icing</option>
+                                    <option value="decorating">Supplies</option>
+                                  </select>
+                                </div>
                               </div>
                             </div>
 
-                            {/* Right: Editable Quantity, Unit & Cost */}
-                            <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
+                            {/* Right: Editable Quantity with Touch Steppers, Unit & Cost */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 pl-7 sm:justify-end sm:pl-0">
                               <div className="flex items-center rounded-xl border border-[#332D27] bg-[#181614] p-1">
+                                <button
+                                  type="button"
+                                  aria-label={`Decrease ${line.pantryItem.name} quantity`}
+                                  onClick={() =>
+                                    onUpdateIngredient(line.lineId, {
+                                      quantity: Math.max(
+                                        0.25,
+                                        Number((line.quantity - stepAmount).toFixed(2))
+                                      ),
+                                    })
+                                  }
+                                  className="flex h-6 w-6 items-center justify-center rounded-lg text-[#9E9589] transition hover:bg-[#24201C] hover:text-[#F5F2EB] active:bg-amber-500 active:text-[#0F0E0C]"
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </button>
                                 <NumericInput
                                   min={0.01}
                                   aria-label={`Quantity for ${line.pantryItem.name}`}
@@ -753,8 +922,22 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                                       quantity: val,
                                     })
                                   }
-                                  className="w-16 bg-transparent px-2 py-1 text-right font-mono text-xs font-bold text-[#F5F2EB] focus:outline-none"
+                                  className="w-14 bg-transparent px-1.5 py-1 text-center font-mono text-xs font-bold text-[#F5F2EB] focus:outline-none"
                                 />
+                                <button
+                                  type="button"
+                                  aria-label={`Increase ${line.pantryItem.name} quantity`}
+                                  onClick={() =>
+                                    onUpdateIngredient(line.lineId, {
+                                      quantity: Number(
+                                        (line.quantity + stepAmount).toFixed(2)
+                                      ),
+                                    })
+                                  }
+                                  className="flex h-6 w-6 items-center justify-center rounded-lg text-[#9E9589] transition hover:bg-[#24201C] hover:text-[#F5F2EB] active:bg-amber-500 active:text-[#0F0E0C]"
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </button>
                                 <select
                                   aria-label={`Unit for ${line.pantryItem.name}`}
                                   value={line.unit}
@@ -763,7 +946,7 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                                       unit: e.target.value as UnitType,
                                     })
                                   }
-                                  className="rounded-lg bg-[#221F1B] px-2 py-1 font-mono text-xs font-medium text-amber-400 focus:outline-none"
+                                  className="ml-0.5 rounded-lg bg-[#221F1B] px-2 py-1 font-mono text-xs font-medium text-amber-400 focus:outline-none"
                                 >
                                   {UNITS.map((u) => (
                                     <option key={u} value={u}>
@@ -773,7 +956,7 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
                                 </select>
                               </div>
 
-                              <div className="min-w-[88px] text-right">
+                              <div className="min-w-[82px] text-right">
                                 <div className="font-mono text-sm font-bold text-[#F5F2EB]">
                                   {formatCurrency(line.scaledCost)}
                                 </div>
