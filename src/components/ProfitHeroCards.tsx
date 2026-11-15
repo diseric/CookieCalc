@@ -411,71 +411,35 @@ export const ProfitHeroCards: React.FC<ProfitHeroCardsProps> = ({
         </div>
       </div>
 
-      {/* Per-Cookie Cost Anatomy Bar (Collapsible legend on mobile for clean vertical space) */}
+      {/* Per-Cookie Cost Anatomy Bar (Collapsed by default; tap header to expand breakdown) */}
       <div className="rounded-2xl border border-[#2A2520] bg-[#181614] px-3.5 py-3 sm:p-4">
-        <div className="flex items-center justify-between gap-2 text-xs">
-          <button
-            type="button"
-            onClick={() => setShowMobileAnatomy((prev) => !prev)}
-            className="flex flex-1 items-center justify-between gap-2 text-left font-semibold text-[#E5DEC9] sm:cursor-default"
-          >
-            <span className="flex items-center gap-2">
-              <Layers className="h-4 w-4 shrink-0 text-amber-400" />
-              <span>
-                Cost Anatomy ({formatCurrency(financials.exactCostPerCookie)}/ea •{' '}
-                {formatCurrency(financials.exactCostPerDozen)}/doz)
-              </span>
+        <button
+          type="button"
+          onClick={() => setShowMobileAnatomy((prev) => !prev)}
+          aria-expanded={showMobileAnatomy}
+          className="flex w-full items-center justify-between gap-2 text-left text-xs font-semibold text-[#E5DEC9]"
+        >
+          <span className="flex items-center gap-2">
+            <Layers className="h-4 w-4 shrink-0 text-amber-400" />
+            <span>
+              Cost Anatomy ({formatCurrency(financials.exactCostPerCookie)}/ea •{' '}
+              {formatCurrency(financials.exactCostPerDozen)}/doz)
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] text-amber-400 sm:hidden">
-              {showMobileAnatomy ? (
-                <>
-                  <span>Hide</span>
-                  <ChevronUp className="h-3.5 w-3.5" />
-                </>
-              ) : (
-                <>
-                  <span>Details</span>
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </>
-              )}
-            </span>
-          </button>
-
-          <div className="hidden flex-wrap items-center gap-4 text-xs text-[#A69C8E] sm:flex">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-              Dough & Icing:{' '}
-              <strong className="font-mono text-[#F5F2EB]">
-                {formatCurrency(financials.doughAndIcingCostPerCookie)}
-              </strong>{' '}
-              ({doughIcingPct}%)
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-pink-400" />
-              Colors & Bags:{' '}
-              <strong className="font-mono text-[#F5F2EB]">
-                {formatCurrency(financials.decoratingSuppliesPerCookie)}
-              </strong>{' '}
-              ({decSuppliesPct}%)
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-sky-400" />
-              Cello & Box:{' '}
-              <strong className="font-mono text-[#F5F2EB]">
-                {formatCurrency(financials.packagingCostPerCookie)}
-              </strong>{' '}
-              ({packPct}%)
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-purple-400" />
-              Overhead:{' '}
-              <strong className="font-mono text-[#F5F2EB]">
-                {formatCurrency(financials.laborAndOverheadPerCookie)}
-              </strong>{' '}
-              ({overheadPct}%)
-            </span>
-          </div>
-        </div>
+          </span>
+          <span className="inline-flex items-center gap-1 text-[11px] text-amber-400">
+            {showMobileAnatomy ? (
+              <>
+                <span>Hide Details</span>
+                <ChevronUp className="h-3.5 w-3.5" />
+              </>
+            ) : (
+              <>
+                <span>Show Details</span>
+                <ChevronDown className="h-3.5 w-3.5" />
+              </>
+            )}
+          </span>
+        </button>
 
         <div className="mt-2 flex h-2.5 w-full overflow-hidden rounded-full bg-[#100E0C] p-0.5 sm:mt-2.5 sm:h-3">
           <div
@@ -500,31 +464,47 @@ export const ProfitHeroCards: React.FC<ProfitHeroCardsProps> = ({
           />
         </div>
 
-        {/* Mobile Expandable Legend */}
+        {/* Expandable Breakdown Legend (Collapsed by default) */}
         {showMobileAnatomy && (
-          <div className="mt-2.5 grid grid-cols-2 gap-2 border-t border-[#26221E] pt-2.5 text-[11px] text-[#A69C8E] sm:hidden">
+          <div className="mt-2.5 grid grid-cols-2 gap-2 border-t border-[#26221E] pt-2.5 text-[11px] text-[#A69C8E] sm:grid-cols-4 sm:text-xs">
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-amber-500" />
               <span>
-                Dough/Icing: <strong className="font-mono text-[#F5F2EB]">{formatCurrency(financials.doughAndIcingCostPerCookie)}</strong> ({doughIcingPct}%)
+                Dough & Icing:{' '}
+                <strong className="font-mono text-[#F5F2EB]">
+                  {formatCurrency(financials.doughAndIcingCostPerCookie)}
+                </strong>{' '}
+                ({doughIcingPct}%)
               </span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 shrink-0 rounded-full bg-pink-400" />
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-pink-400" />
               <span>
-                Colors/Bags: <strong className="font-mono text-[#F5F2EB]">{formatCurrency(financials.decoratingSuppliesPerCookie)}</strong> ({decSuppliesPct}%)
+                Colors & Bags:{' '}
+                <strong className="font-mono text-[#F5F2EB]">
+                  {formatCurrency(financials.decoratingSuppliesPerCookie)}
+                </strong>{' '}
+                ({decSuppliesPct}%)
               </span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 shrink-0 rounded-full bg-sky-400" />
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-sky-400" />
               <span>
-                Packaging: <strong className="font-mono text-[#F5F2EB]">{formatCurrency(financials.packagingCostPerCookie)}</strong> ({packPct}%)
+                Packaging:{' '}
+                <strong className="font-mono text-[#F5F2EB]">
+                  {formatCurrency(financials.packagingCostPerCookie)}
+                </strong>{' '}
+                ({packPct}%)
               </span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 shrink-0 rounded-full bg-purple-400" />
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-purple-400" />
               <span>
-                Overhead: <strong className="font-mono text-[#F5F2EB]">{formatCurrency(financials.laborAndOverheadPerCookie)}</strong> ({overheadPct}%)
+                Overhead:{' '}
+                <strong className="font-mono text-[#F5F2EB]">
+                  {formatCurrency(financials.laborAndOverheadPerCookie)}
+                </strong>{' '}
+                ({overheadPct}%)
               </span>
             </span>
           </div>
