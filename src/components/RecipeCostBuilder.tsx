@@ -37,11 +37,13 @@ import {
   validateRecipeIngredientInput,
 } from '../utils/validation';
 import { NumericInput } from './NumericInput';
+import { OrderIngredientCalculator } from './OrderIngredientCalculator';
 
 interface RecipeCostBuilderProps {
   recipe: CookieRecipe;
   pantry: PantryItem[];
   financials: RecipeFinancialSummary;
+  onChangeBatchMultiplier: (mult: number) => void;
   onUpdateIngredient: (lineId: string, patch: Partial<RecipeIngredientLine>) => void;
   onRemoveIngredient: (lineId: string) => void;
   onAddIngredient: (line: RecipeIngredientLine) => void;
@@ -89,6 +91,7 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
   recipe,
   pantry,
   financials,
+  onChangeBatchMultiplier,
   onUpdateIngredient,
   onRemoveIngredient,
   onAddIngredient,
@@ -364,6 +367,14 @@ export const RecipeCostBuilder: React.FC<RecipeCostBuilderProps> = ({
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Order Size Ingredient & Shopping Calculator (Collapsed by default) */}
+      <OrderIngredientCalculator
+        recipe={recipe}
+        pantry={pantry}
+        activeBatchMultiplier={financials.batchMultiplier}
+        onApplyBatchMultiplier={onChangeBatchMultiplier}
+      />
+
       {/* Main Recipe Builder Card */}
       <div className="overflow-hidden rounded-2xl border border-[#2E2924] bg-[#181614] shadow-sm">
         {/* Card Header */}

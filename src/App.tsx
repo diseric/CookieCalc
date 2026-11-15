@@ -402,6 +402,14 @@ export function App() {
               recipe={activeRecipe}
               pantry={pantry}
               financials={financials}
+              onChangeBatchMultiplier={(mult) => {
+                setBatchMultiplier(mult);
+                showToast(
+                  `Scaled recipe to ${mult}x batch (${Math.round(
+                    activeRecipe.baseYieldCookies * mult
+                  )} cutouts)`
+                );
+              }}
               onUpdateIngredient={handleUpdateIngredient}
               onRemoveIngredient={handleRemoveIngredient}
               onAddIngredient={handleAddIngredient}

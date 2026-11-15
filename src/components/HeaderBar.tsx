@@ -174,7 +174,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
               aria-label="Batch scaling multiplier"
             >
               {MULTIPLIERS.map((m) => {
-                const active = batchMultiplier === m.value;
+                const active = Math.abs(batchMultiplier - m.value) < 0.005;
                 return (
                   <button
                     key={m.value}
@@ -190,6 +190,11 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
                   </button>
                 );
               })}
+              {!MULTIPLIERS.some((m) => Math.abs(batchMultiplier - m.value) < 0.005) && (
+                <span className="ml-0.5 rounded-lg bg-amber-500 px-2 py-1 font-mono text-xs font-bold text-[#0F0E0C] shadow-sm">
+                  {batchMultiplier}x
+                </span>
+              )}
             </div>
 
             {/* + Build New Recipe CTA Button (Desktop; on mobile it lives in bottom thumb bar) */}
